@@ -15,7 +15,7 @@ int main(int argc, char*argv){
 
     return 0;
 }
-void* mymalloc(int size){
+void* mymalloc(int size, int codeLine, char*fileName){
 
     if(myblock[0] == 0xFF && myblock[1] == 0x55){
         // Our static byte array has metadata in it
