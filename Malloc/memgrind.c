@@ -196,9 +196,14 @@ int main(int argc, char** argv){
 
     }
 
+    FILE * fp;
+    fp = fopen("readme.txt","w+");
+
     for(int t = 0; t < 6; t++){
         runTime[t] /= 100;
+        fprintf(fp, "The run time for workload number %d is %f\n", t+1, runTime[t]);
     }
     
+    fclose(fp);
     return 0;
 }
