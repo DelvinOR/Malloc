@@ -7,9 +7,11 @@
 
 void workloadA(){
     // Workload A: malloc() 1 byte and immediately free it - do this 150 times
-    for(int i = 0; i < 150; i++){
+    int i = 0;
+    while(i < 150){
         void* a = malloc(1);
         free(a);
+        i++;
     }
     
     return;
@@ -20,14 +22,18 @@ void workloadB(){
     // Once you've malloc()ed 50 byte chunks, then free() the 50 1 byte pointers one by one.
     char*arr[50];
 
-    for(int i = 0; i< 150; i++){
+    int i = 0;
+    while(i< 150){
         arr[i%50] = (char*) malloc(1);
         if(i%50 == 49){
             // free() one by one
-            for(int j = 0; j < 50; j++){
+            int j = 0;
+            while(j < 50){
                 free( (void*) arr[j] );
+                j++;
             }
         }
+        i++;
     }
 
     return;
@@ -82,14 +88,16 @@ void workloadD(){
     */
    char*arr[50];
 
-   int maxMemoryCapacity = (4096 - 2 - sizeof(md)); // Need to confirm?????????
+   int maxMemoryCapacity = (4096 - 2 - sizeof(md)); 
    int num = 0;
    int randMemory = 0;
    int c = 0;
    int memoryTrack[50]; // array to help keep track of the size of memory we decide to allocate
 
-   for(int i = 0; i<50; i++){
+   int i = 0;
+   while(i<50){
        memoryTrack[i] = 0;
+       i++;
    }
 
    while(c < 50){
@@ -124,9 +132,11 @@ void workloadE(){
     // malloc() entire memory capacity and free() it as well 150 times.
     // It would be interesting to test this workload against workload A.
 
-    for(int i = 0; i < 150; i++){
+    int i = 0;
+    while(i < 150){
         void* a = malloc((4096 - 2 - sizeof(md)));
         free(a);
+        i++;
     }
     
     return;
@@ -140,17 +150,21 @@ void workloadF(){
     // malloc again.
     
     char* a[4096];
-    for(int j = 0; j < (4096 - 2 - sizeof(md)); j++){
+    int j = 0;
+    while(j < (4096 - 2 - sizeof(md))){
         a[j] = (char*)malloc(1);
         if(a[j] == NULL){
             break;
         }
         free((void*) a[j]);
+        j++;
     }
 
-    for(int i = 0; i < 150; i++){
+    int i = 0;
+    while(i < 150){
         a[0] = (char*)malloc((4096 - 2 - sizeof(md)));
         free((void*) a[0]);
+        i++;
     }
 
     return;
@@ -159,52 +173,58 @@ void workloadF(){
 int main(int argc, char** argv){
 
     double runTime[6];
-    for(int i = 0; i< 6; i++){
+    int i = 0;
+    while(i< 6){
         runTime[i] = 0;
+        i++;
     }
 
-    clock_t start, end;
-    for(int j = 0; j< 100; j++){
+    struct timespec start, end;
+    int j = 0;
+    while(j< 100){
 
-        start = clock();
+        clock_gettime(CLOCK_REALTIME, &start);
         workloadA();
-        end = clock();
-        runTime[0] += ((double) (end - start))/CLOCKS_PER_SEC;
+        clock_gettime(CLOCK_REALTIME, &end);
+        runTime[0] += ((double) (end.tv_nsec - start.tv_nsec))/1000000.0;
 
-        start = clock();
+        clock_gettime(CLOCK_REALTIME, &start);
         workloadB();
-        end = clock();
-        runTime[1] += ((double) (end - start))/CLOCKS_PER_SEC;
+        clock_gettime(CLOCK_REALTIME, &end);
+        runTime[1] += ((double) (end.tv_nsec - start.tv_nsec))/1000000.0;
 
-        start = clock();
+        clock_gettime(CLOCK_REALTIME, &start);
         workloadC();
-        end = clock();
-        runTime[2] += ((double) (end - start))/CLOCKS_PER_SEC;
+        clock_gettime(CLOCK_REALTIME, &end);
+        runTime[2] += ((double) (end.tv_nsec - start.tv_nsec))/1000000.0;
 
-        start = clock();
+        clock_gettime(CLOCK_REALTIME, &start);
         workloadD();
-        end = clock();
-        runTime[3] += ((double) (end - start))/CLOCKS_PER_SEC;
+        clock_gettime(CLOCK_REALTIME, &end);
+        runTime[3] += ((double) (end.tv_nsec - start.tv_nsec))/1000000.0;
 
-        start = clock();
+        clock_gettime(CLOCK_REALTIME, &start);
         workloadE();
-        end = clock();
-        runTime[4] += ((double) (end - start))/CLOCKS_PER_SEC;
+        clock_gettime(CLOCK_REALTIME, &end);
+        runTime[4] += ((double) (end.tv_nsec - start.tv_nsec))/1000000.0;
 
-        start = clock();
+        clock_gettime(CLOCK_REALTIME, &start);
         workloadF();
-        end = clock();
-        runTime[5] += ((double) (end - start))/CLOCKS_PER_SEC;
+        clock_gettime(CLOCK_REALTIME, &end);
+        runTime[5] += ((double) (end.tv_nsec - start.tv_nsec))/1000000.0;
 
+        j++;
     }
 
     FILE * fp;
-    fp = fopen("readme.txt","w");
+    fp = fopen("readme.txt","w+");
 
     char workloads[6] = {'A','B','C','D', 'E', 'F'};
-    for(int t = 0; t < 6; t++){
+    int t = 0;
+    while(t < 6){
         runTime[t] /= 100;
-        fprintf(fp, "The run time for workload %c is %f seconds\n", workloads[t], runTime[t]);
+        fprintf(fp, "The run time for workload %c is %f microseconds\n", workloads[t], runTime[t]);
+        t++;
     }
     
     fclose(fp);
