@@ -18,8 +18,9 @@ int main(int argc, char *argv[]){//temp main driver
 	char conarray[] = "Hello this is a test designed to see if my program works as i intended it to. So far this is working as intended, if there are any irregularities, then perhaps something has gone wrong! 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100!";
 	char* array = malloc(26);
 	int* array1 = malloc(40 * sizeof(int));
-	char** array3 = malloc(420 * sizeof(char**));
+	
 	char* array2 = malloc(sizeof(conarray));
+	char** array3 = malloc(420 * sizeof(char**));
 	//char** array3 = malloc(400 * sizeof(char**));
 	
 	if (array2){
@@ -75,6 +76,15 @@ int main(int argc, char *argv[]){//temp main driver
 	printf("Message:\n %s \n", array2);
 	printf("DEBUG: freeing a0\n");
 	free(array);
+	free(array2);
+	free(array2);
+	printf("SIZE: %d\n", ((md*)(array1)-1)->size);
+	printf("NEXT: %x\n",((md*)(array1)-1)->next);
+	printf("arr2add: %x\n", ((md*)(array2)-1));
+	printf("arr3add: %x\n", ((md*)(array3)-1));
+	free(array);
+	free(array1);
+	free(array3);
 	if (((md*)(array)-1)->inUse == 'n'){
 		printf("DEBUG: array0 freed!\n");
 	}
@@ -83,7 +93,6 @@ int main(int argc, char *argv[]){//temp main driver
 	}
 	
 	printf("DEBUG: freeing a1\n");
-	free(array1);
 	if (((md*)(array1)-1)->inUse == 'n'){
 		printf("DEBUG: array1 freed!\n");
 	}
@@ -91,7 +100,6 @@ int main(int argc, char *argv[]){//temp main driver
 		printf("DEBUG: ERROR: array1 NOT freed!\n");
 	}
 	printf("DEBUG: freeing a2\n");
-	free(array2);
 	if (((md*)(array2)-1)->inUse == 'n'){
 		printf("DEBUG: array2 freed!\n");
 	}
@@ -99,7 +107,6 @@ int main(int argc, char *argv[]){//temp main driver
 		printf("DEBUG: ERROR: array2 NOT freed!\n");
 	}
 	printf("DEBUG: freeing a3\n");
-	free(array3);
 	if (((md*)(array3)-1)->inUse == 'n'){
 		printf("DEBUG: array3 freed!\n");
 	}
@@ -296,8 +303,12 @@ void myfree(void* ptr, char* file, int line){
 						return;
 					}
 				}//end of parent block not in use
-				else {//block still in use
+				else {//block still in use/does not need cleanup
 					int reclaim = mdptr->size + sizeof(md);
+					if (mdptr->next == NULL || mdptr->next->inUse == 'y'){//only clean mdptr
+						mdptr->inUse = 'n';
+						return;
+					}
 					mdptr->key1 = (char)(0xCC);
 					mdptr->key2 = (char)(0xCC);
 					mdptr = mdptr->next;
