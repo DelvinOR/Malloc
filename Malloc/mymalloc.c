@@ -15,16 +15,17 @@ int main(int argc, char*argv){
 
     return 0;
 }
+
 void* mymalloc(int size, int codeLine, char*fileName){
 
     if(myblock[0] == 0xFF && myblock[1] == 0x55){
         // Our static byte array has metadata in it
 
-    }else{// There is data in our myblock
+    }else{// There is no  metadata in our myblock
             myblock[0] = 0xFF;
-            myblock[1] = 0x55; 
+            myblock[1] = 0x55;
             
-            struct metadata startBlock = {4096 - 2 - 1 - ptrsize, 'n', NULL};
+            struct metadata startBlock = {4096 - 2 - 1 - ptrsize, 'n', NULL};  
 
             struct metadata* ptr = &myblock[2];
             
@@ -37,7 +38,7 @@ void* mymalloc(int size, int codeLine, char*fileName){
     }
 }
 
-void myfree(void * ptr){
+void myfree(void * ptr, int codeLine, char* fileName){
     if(myblock[0] != 0xFF && myblock[1] != 0x55){
         //fprint(__FILE__, "Cannot free because nothing has been allocated\n");
         return;

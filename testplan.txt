@@ -1,0 +1,4 @@
+Workload E: malloc() entire memory capacity and free() immediately for a total 150 times. It would be interesting to test this workload against workload A.
+
+Workload F: malloc() 1 byte until you reach the entire memory capacity. Free() all pointers one by one do this 50 times. Given we are malloc() ing until 
+            the memory capacity is full, this workload should take the longest. It would be interesting to just how long it would take.
