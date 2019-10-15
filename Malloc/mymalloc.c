@@ -13,7 +13,7 @@
 
 
 
-
+/**
 int main(int argc, char *argv[]){//temp main driver
 	char conarray[] = "Hello this is a test designed to see if my program works as i intended it to. So far this is working as intended, if there are any irregularities, then perhaps something has gone wrong! 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100!";
 	char* array = malloc(26);
@@ -115,11 +115,21 @@ int main(int argc, char *argv[]){//temp main driver
 	}
 	return 0;
 }
-
+**/
 void* mymalloc (int size, char* file, int line){
 	char* byteptr = myblock;
 	int* intptr = myblock;
 	md* metaptr = NULL;
+
+	//printf("DEBUG: requested: %d\n", size);
+	//md* debg = &myblock[2];
+	//int d = 1;
+	//while (debg != NULL){
+	//	printf("DEBUG: block %d is: %c size: %d\n", d, debg->inUse, debg->size);
+	//	d++;
+	//	debg = debg->next;
+	//}
+
 	if (size <= 0){
 		printf("Error in %s on line %d:\n", file, line);
 		printf("\tEnter an amount > 0!\n");
@@ -146,7 +156,7 @@ void* mymalloc (int size, char* file, int line){
 							}
 							else {//cant split
 								block->inUse = 'y';
-								printf("DEBUG: can't split\n");
+								//printf("DEBUG: can't split\n");
 								return ++block;
 							}
 						}
@@ -159,7 +169,7 @@ void* mymalloc (int size, char* file, int line){
                 return NULL;
     }
 	else{//uninitialized
-		printf("DEBUG: Mymalloc uninitialized\n");
+		//printf("DEBUG: Mymalloc uninitialized\n");
 		metaptr = &myblock[2];
 		int remaining = (4096 - 2 - sizeof(md));
 		if (remaining - size > sizeof(md)){//can create another block
@@ -198,7 +208,7 @@ void* mymalloc (int size, char* file, int line){
 			myblock[0] = 0xFF;//set check bytes
 			myblock[1] = 0x55;
 			printf("Error in %s on line %d:\n", file, line);
-			printf("\tNot enough memory!\n");
+			printf("\tSize greater than array!\n");
 			return NULL;
 		}
 	}
@@ -303,7 +313,7 @@ void myfree(void* ptr, char* file, int line){
 						return;
 					}
 				}//end of parent block not in use
-				else {//block still in use/does not need cleanup
+				else {//block->inUse == 'y'     //block still in use/does not need cleanup
 					int reclaim = mdptr->size + sizeof(md);
 					if (mdptr->next == NULL || mdptr->next->inUse == 'y'){//only clean mdptr
 						mdptr->inUse = 'n';
@@ -319,13 +329,23 @@ void myfree(void* ptr, char* file, int line){
 						mdptr = mdptr->next;
 					}
 					if (mdptr == NULL){//ran out of blocks
-						block->next = NULL;
-						block->size = block->size + reclaim;
+						md* newblock = (char*)(block+1) + block->size;
+						block->next = newblock;
+						newblock->size = reclaim - sizeof(md);///should be right
+						newblock->inUse = 'n';
+						newblock->next = NULL;
+						newblock->key1 = (char)(0xFF);
+						newblock->key2 = (char)(0x55);
 						return;
 					}
 					else {//ran into a block in use
-						block->next = mdptr;
-						block->size = block->size + reclaim;
+						md* newblock = (char*)(block+1) + block->size;
+						block->next = newblock;
+						newblock->size = reclaim - sizeof(md);
+						newblock->inUse = 'n';
+						newblock->next = mdptr;
+						newblock->key1 = (char)(0xFF);
+						newblock->key2 = (char)(0x55);
 						return;
 					}
 				}//end of parent block still in use
