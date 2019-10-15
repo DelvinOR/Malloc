@@ -179,6 +179,7 @@ int main(int argc, char** argv){
         i++;
     }
 
+    // Decided to go with microseconds for the runtime
     struct timespec start, end;
     int j = 0;
     while(j< 100){
