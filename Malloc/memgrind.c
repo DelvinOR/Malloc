@@ -82,7 +82,7 @@ void workloadD(){
     */
    char*arr[50];
 
-   int maxMemoryCapacity = 4094; // Need to confirm?????????
+   int maxMemoryCapacity = (4096 - 2 - sizeof(md)); // Need to confirm?????????
    int num = 0;
    int randMemory = 0;
    int c = 0;
@@ -125,7 +125,7 @@ void workloadE(){
     // It would be interesting to test this workload against workload A.
 
     for(int i = 0; i < 150; i++){
-        void* a = malloc(4094);
+        void* a = malloc((4096 - 2 - sizeof(md)));
         free(a);
     }
     
@@ -133,25 +133,27 @@ void workloadE(){
 }
 
 void workloadF(){
-    // malloc() 1 byte until you reach the entire memory capacity.
-    // free() all pointers one by one
-    // do this 50 times.
-    // Given we are malloc() ing until the memory capacity is full, this workload should take the longest.
-    // It would be interesting to just how long it would take.
-
-    char* arr[4094];
-    for(int i = 0 ; i < 50; i++){
-        for(int j = 0; j < 4094; j++){
-            arr[j] = (char*)malloc(1);
+    // malloc() 1 until we run out of storage space or if malloc return null 
+    // but immeadiately free after successfully malloc()ing, we free().
+    // We should have all available space back after so just malloc max storage and then free it immediately 150 times.
+    // A modification of workload E but in F we make sure that free() successfully emptied out our array so that we can
+    // malloc again.
+    
+    char* a[4096];
+    for(int j = 0; j < (4096 - 2 - sizeof(md)); j++){
+        a[j] = (char*)malloc(1);
+        if(a[j] == NULL){
+            break;
         }
+        free((void*) a[j]);
+    }
 
-        for(int t = 0; t < 4094; t++){
-            free((void*) arr[t]);
-        }
+    for(int i = 0; i < 150; i++){
+        a[0] = (char*)malloc((4096 - 2 - sizeof(md)));
+        free((void*) a[0]);
     }
 
     return;
-
 }
 
 int main(int argc, char** argv){
@@ -197,11 +199,12 @@ int main(int argc, char** argv){
     }
 
     FILE * fp;
-    fp = fopen("readme.txt","w+");
+    fp = fopen("readme.txt","w");
 
+    char workloads[6] = {'A','B','C','D', 'E', 'F'};
     for(int t = 0; t < 6; t++){
         runTime[t] /= 100;
-        fprintf(fp, "The run time for workload number %d is %f\n", t+1, runTime[t]);
+        fprintf(fp, "The run time for workload %c is %f seconds\n", workloads[t], runTime[t]);
     }
     
     fclose(fp);

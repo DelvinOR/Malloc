@@ -1,4 +1,5 @@
 Workload E: malloc() entire memory capacity and free() immediately for a total 150 times. It would be interesting to test this workload against workload A.
 
-Workload F: malloc() 1 byte until you reach the entire memory capacity. Free() all pointers one by one do this 50 times. Given we are malloc() ing until 
-            the memory capacity is full, this workload should take the longest. It would be interesting to just how long it would take.
+Workload F: malloc() 1 byte until we run out of storage space or malloc return null. Immeadiately call free() after successfully malloc()ing. We should have
+            all available space back after so then we malloc() max storage space and then free() immediately for a total of 150 times. This is kind of a 
+            modification to workload E but in here we are checkiing to see if free() successfully restored our memory.
