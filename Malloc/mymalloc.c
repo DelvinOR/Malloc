@@ -120,7 +120,7 @@ void* mymalloc (int size, char* file, int line){
 	char* byteptr = myblock;
 	int* intptr = myblock;
 	md* metaptr = NULL;
-
+	//printf("SIZE : %d\n", sizeof(md));
 	//printf("DEBUG: requested: %d\n", size);
 	//md* debg = &myblock[2];
 	//int d = 1;
@@ -150,7 +150,7 @@ void* mymalloc (int size, char* file, int line){
 								newblock->size = remaining;
 								newblock->inUse = 'n';
 								newblock->key1 = (char)0xFF;
-								newblock->key2 = (char)0x55;
+								//newblock->key2 = (char)0x55;
 								newblock->next = oldnext;
 								return ++block;
 							}
@@ -176,13 +176,13 @@ void* mymalloc (int size, char* file, int line){
 			metaptr->size = size;
 			metaptr->inUse = 'y';
 			metaptr->key1 = (char)0xFF;
-			metaptr->key2 = (char)0x55;
+			//metaptr->key2 = (char)0x55;
 			md* newmeta = (char*)(metaptr + 1) + size;
 			newmeta->size = remaining - sizeof(md) - size;
 			newmeta->next = NULL;
 			newmeta->inUse = 'n';
 			newmeta->key1 = (char)0xFF;
-			newmeta->key2 = (char)0x55;
+			//newmeta->key2 = (char)0x55;
 			metaptr->next = newmeta;
 			myblock[0] = 0xFF;//set check bytes
 			myblock[1] = 0x55;
@@ -193,7 +193,7 @@ void* mymalloc (int size, char* file, int line){
 			metaptr->next = NULL;
 			metaptr->inUse = 'y';
 			metaptr->key1 = (char)0xFF;
-			metaptr->key2 = (char)0x55;
+			//metaptr->key2 = (char)0x55;
 			myblock[0] = 0xFF;//set check bytes
 			myblock[1] = 0x55;
 			return ++metaptr;//address requested
@@ -204,7 +204,7 @@ void* mymalloc (int size, char* file, int line){
 			metaptr->next = NULL;
 			metaptr->inUse = 'n';
 			metaptr->key1 = (char)0xFF;
-			metaptr->key2 = (char)0x55;
+			//metaptr->key2 = (char)0x55;
 			myblock[0] = 0xFF;//set check bytes
 			myblock[1] = 0x55;
 			printf("Error in %s on line %d:\n", file, line);
@@ -229,7 +229,7 @@ void myfree(void* ptr, char* file, int line){
 		printf("\tNot a pointer!\n");
 		return;
 	}
-	if (mdptr->key1 == (char)0xFF && mdptr->key2 == (char)0x55){//is proper pointer
+	if (mdptr->key1 == (char)0xFF ){//&& mdptr->key2 == (char)0x55){//is proper pointer
 		//printf("DEBUG: myfree: ptr is a block\n");
 		if (mdptr->inUse == 'n'){//already freed
 			printf("Error in %s on line %d:\n", file, line);
@@ -246,7 +246,7 @@ void myfree(void* ptr, char* file, int line){
 				//printf("eeeeeeeeeeeeeeeeeeeee\n");
 				reclaim += block->size + sizeof(md);
 				block->key1 = (char)(0xCC);//mark block as cleaned
-				block->key2 = (char)(0xCC);
+				//block->key2 = (char)(0xCC);
 				block = block->next;
 			}
 			//printf("DDDDDDDDDDDDD\n");
@@ -269,12 +269,12 @@ void myfree(void* ptr, char* file, int line){
 					if(block == &myblock[2]){//cleanup from first block
 						int reclaim = mdptr->size + sizeof(md);
 						mdptr->key1 = (char)(0xCC);
-						mdptr->key2 = (char)(0xCC);
+						//mdptr->key2 = (char)(0xCC);
 						mdptr = mdptr->next;
 						while (mdptr != NULL && mdptr->inUse == 'n'){//perform cleanup
 							reclaim += mdptr->size + sizeof(md);
 							mdptr->key1 = (char)(0xCC);//mark block as cleaned
-							mdptr->key2 = (char)(0xCC);
+							//mdptr->key2 = (char)(0xCC);
 							mdptr = mdptr->next;
 						}
 						if (mdptr == NULL){//ran out of blocks
@@ -290,15 +290,15 @@ void myfree(void* ptr, char* file, int line){
 					}//else block not first block
 					int reclaim = block->size + sizeof(md);
 					block->key1 = (char)(0xCC);
-					block->key2 = (char)(0xCC);
+					//block->key2 = (char)(0xCC);
 					reclaim += mdptr->size + sizeof(md);
 					mdptr->key1 = (char)(0xCC);
-					mdptr->key2 = (char)(0xCC);
+					//mdptr->key2 = (char)(0xCC);
 					mdptr = mdptr->next;
 					while (mdptr != NULL && mdptr->inUse == 'n'){//perform cleanup
 						reclaim += mdptr->size + sizeof(md);
 						mdptr->key1 = (char)(0xCC);//mark block as cleaned
-						mdptr->key2 = (char)(0xCC);
+						//mdptr->key2 = (char)(0xCC);
 						mdptr = mdptr->next;
 					}
 					--block;
@@ -320,12 +320,12 @@ void myfree(void* ptr, char* file, int line){
 						return;
 					}
 					mdptr->key1 = (char)(0xCC);
-					mdptr->key2 = (char)(0xCC);
+					//mdptr->key2 = (char)(0xCC);
 					mdptr = mdptr->next;
 					while (mdptr != NULL && mdptr->inUse == 'n'){//perform cleanup
 						reclaim += mdptr->size + sizeof(md);
 						mdptr->key1 = (char)(0xCC);//mark block as cleaned
-						mdptr->key2 = (char)(0xCC);
+						//mdptr->key2 = (char)(0xCC);
 						mdptr = mdptr->next;
 					}
 					if (mdptr == NULL){//ran out of blocks
@@ -335,7 +335,7 @@ void myfree(void* ptr, char* file, int line){
 						newblock->inUse = 'n';
 						newblock->next = NULL;
 						newblock->key1 = (char)(0xFF);
-						newblock->key2 = (char)(0x55);
+						//newblock->key2 = (char)(0x55);
 						return;
 					}
 					else {//ran into a block in use
@@ -345,7 +345,7 @@ void myfree(void* ptr, char* file, int line){
 						newblock->inUse = 'n';
 						newblock->next = mdptr;
 						newblock->key1 = (char)(0xFF);
-						newblock->key2 = (char)(0x55);
+						//newblock->key2 = (char)(0x55);
 						return;
 					}
 				}//end of parent block still in use
